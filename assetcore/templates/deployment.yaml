@@ -1,0 +1,39 @@
+{{- range $serviceName, $serviceConfig := .Values.services }}
+{{- if $serviceConfig.enabled }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $serviceName }}
+  labels:
+    app: {{ $serviceName }}
+    {{- include "assetcore.labels" $ | nindent 4 }}
+spec:
+  {{- if not $serviceConfig.autoscaling.enabled }}
+  replicas: {{ $serviceConfig.replicaCount | default 1 }}
+  {{- end }}
+  selector:
+    matchLabels:
+      app: {{ $serviceName }}
+  template:
+    metadata:
+      labels:
+        app: {{ $serviceName }}
+    spec:
+      containers:
+        - name: {{ $serviceName }}
+          image: "{{ $serviceConfig.image.repository }}:{{ $serviceConfig.image.tag | default "latest" }}"
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: {{ $serviceConfig.containerPort | default 8080 }}
+          {{- if $serviceConfig.env }}
+          env:
+            {{- range $key, $value := $serviceConfig.env }}
+            - name: {{ $key }}
+              value: {{ $value | quote }}
+            {{- end }}
+          {{- end }}
+          resources:
+            {{- toYaml $serviceConfig.resources | nindent 12 }}
+{{- end }}
+{{- end }}

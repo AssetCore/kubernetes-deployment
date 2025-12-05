@@ -1,0 +1,28 @@
+{{- if .Values.ingress.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "assetcore.fullname" . }}
+  labels:
+    {{- include "assetcore.labels" . | nindent 4 }}
+  {{- with .Values.ingress.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  rules:
+    - host: {{ .Values.ingress.host }}
+      http:
+        paths:
+          {{- range $serviceName, $serviceConfig := .Values.services }}
+          {{- if $serviceConfig.enabled }}
+          - path: /{{ $serviceName }}
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ $serviceName }}-svc
+                port:
+                  number: {{ $serviceConfig.servicePort | default 80 }}
+          {{- end }}
+          {{- end }}
+{{- end }}

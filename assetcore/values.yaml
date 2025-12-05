@@ -1,0 +1,479 @@
+# AssetCore Helm Chart - Simplified Configuration
+
+# Services configuration
+services:
+  assetregistry:
+    enabled: true
+    replicaCount: 2
+    image:
+      repository: assetregistry/api
+      tag: latest
+    containerPort: 8080
+    servicePort: 80
+    resources:
+      limits:
+        cpu: 500m
+        memory: 512Mi
+      requests:
+        cpu: 100m
+        memory: 128Mi
+    env:
+      ASPNETCORE_ENVIRONMENT: Production
+    configMap:
+      enabled: true
+      data:
+        ConnectionStrings__AssetRegistryDb: "Server=sqlserver-service;Database=AssetRegistryDB;TrustServerCertificate=True"
+    secrets:
+      enabled: true
+      data:
+        DB_USERNAME: ""
+        DB_PASSWORD: ""
+    autoscaling:
+      enabled: false
+      minReplicas: 2
+      maxReplicas: 10
+      targetCPUUtilizationPercentage: 70
+
+  auditcompliance:
+    enabled: true
+    replicaCount: 2
+    image:
+      repository: auditcompliance/api
+      tag: latest
+    containerPort: 8080
+    servicePort: 80
+    resources:
+      limits:
+        cpu: 300m
+        memory: 256Mi
+      requests:
+        cpu: 50m
+        memory: 64Mi
+    env:
+      ASPNETCORE_ENVIRONMENT: Production
+    configMap:
+      enabled: false
+    secrets:
+      enabled: false
+    autoscaling:
+      enabled: false
+
+  identityaccess:
+    enabled: true
+    replicaCount: 2
+    image:
+      repository: identityaccess/api
+      tag: latest
+    containerPort: 8080
+    servicePort: 80
+    resources:
+      limits:
+        cpu: 300m
+        memory: 256Mi
+      requests:
+        cpu: 50m
+        memory: 64Mi
+    env:
+      ASPNETCORE_ENVIRONMENT: Production
+    configMap:
+      enabled: false
+    secrets:
+      enabled: false
+    autoscaling:
+      enabled: false
+
+  maintenancescheduler:
+    enabled: true
+    replicaCount: 2
+    image:
+      repository: maintenancescheduler/api
+      tag: latest
+    containerPort: 8080
+    servicePort: 80
+    resources:
+      limits:
+        cpu: 300m
+        memory: 256Mi
+      requests:
+        cpu: 50m
+        memory: 64Mi
+    env:
+      ASPNETCORE_ENVIRONMENT: Production
+    configMap:
+      enabled: false
+    secrets:
+      enabled: false
+    autoscaling:
+      enabled: false
+
+  notification:
+    enabled: true
+    replicaCount: 2
+    image:
+      repository: notification/api
+      tag: latest
+    containerPort: 8080
+    servicePort: 80
+    resources:
+      limits:
+        cpu: 200m
+        memory: 128Mi
+      requests:
+        cpu: 50m
+        memory: 64Mi
+    env:
+      ASPNETCORE_ENVIRONMENT: Production
+    configMap:
+      enabled: false
+    secrets:
+      enabled: false
+    autoscaling:
+      enabled: false
+
+# Ingress configuration
+ingress:
+  enabled: false
+  host: assetcore.local
+  annotations: {}
+        periodSeconds: 10
+        timeoutSeconds: 5
+        failureThreshold: 3
+    
+    env:
+      ASPNETCORE_ENVIRONMENT: "Production"
+      ASPNETCORE_URLS: "http://+:8080"
+    
+    envFrom:
+      - configMapRef:
+          name: "auditcompliance-configmap"
+    
+    configMap:
+      data:
+        Logging__LogLevel__Default: "Information"
+        Logging__LogLevel__Microsoft.AspNetCore: "Warning"
+        AllowedHosts: "*"
+        AssetRegistry__BaseUrl: "http://assetregistry-service"
+    
+    autoscaling:
+      enabled: true
+      minReplicas: 1
+      maxReplicas: 5
+      targetCPUUtilizationPercentage: 70
+      targetMemoryUtilizationPercentage: 80
+    
+    monitoring:
+      enabled: true
+      metricsPath: "/metrics"
+      interval: "30s"
+      scrapeTimeout: "10s"
+    
+    serviceAccount:
+      annotations: {}
+      automountServiceAccountToken: false
+
+  identityaccess:
+    enabled: true
+    replicaCount: 2
+    
+    image:
+      repository: "identityaccess/api"
+      tag: "latest"
+      pullPolicy: IfNotPresent
+    
+    containerPort: 8080
+    
+    service:
+      type: ClusterIP
+      port: 80
+      annotations: {}
+    
+    resources:
+      limits:
+        cpu: "400m"
+        memory: "384Mi"
+      requests:
+        cpu: "100m"
+        memory: "128Mi"
+    
+    healthCheck:
+      liveness:
+        path: "/health/live"
+        initialDelaySeconds: 30
+        periodSeconds: 30
+        timeoutSeconds: 5
+        failureThreshold: 3
+      readiness:
+        path: "/health/ready"
+        initialDelaySeconds: 10
+        periodSeconds: 10
+        timeoutSeconds: 5
+        failureThreshold: 3
+    
+    env:
+      ASPNETCORE_ENVIRONMENT: "Production"
+      ASPNETCORE_URLS: "http://+:8080"
+    
+    envFrom:
+      - secretRef:
+          name: "identityaccess-secret"
+      - configMapRef:
+          name: "identityaccess-configmap"
+    
+    configMap:
+      data:
+        Logging__LogLevel__Default: "Information"
+        Logging__LogLevel__Microsoft.AspNetCore: "Warning"
+        AllowedHosts: "*"
+        AsgardeoSettings__OrganizationName: "your-org"
+        AsgardeoSettings__BaseUrl: "https://api.asgardeo.io"
+    
+    secrets:
+      data:
+        AsgardeoSettings__ClientId: "your-client-id"
+        AsgardeoSettings__ClientSecret: "your-client-secret"
+        AsgardeoSettings__ApiToken: "your-api-token"
+    
+    autoscaling:
+      enabled: true
+      minReplicas: 2
+      maxReplicas: 8
+      targetCPUUtilizationPercentage: 70
+      targetMemoryUtilizationPercentage: 80
+    
+    monitoring:
+      enabled: true
+      metricsPath: "/metrics"
+      interval: "30s"
+      scrapeTimeout: "10s"
+    
+    serviceAccount:
+      annotations: {}
+      automountServiceAccountToken: false
+
+  maintenancescheduler:
+    enabled: true
+    replicaCount: 1
+    
+    image:
+      repository: "maintenancescheduler/api"
+      tag: "latest"
+      pullPolicy: IfNotPresent
+    
+    containerPort: 8080
+    
+    service:
+      type: ClusterIP
+      port: 80
+      annotations: {}
+    
+    resources:
+      limits:
+        cpu: "300m"
+        memory: "256Mi"
+      requests:
+        cpu: "50m"
+        memory: "64Mi"
+    
+    healthCheck:
+      liveness:
+        path: "/health/live"
+        initialDelaySeconds: 30
+        periodSeconds: 30
+        timeoutSeconds: 5
+        failureThreshold: 3
+      readiness:
+        path: "/health/ready"
+        initialDelaySeconds: 10
+        periodSeconds: 10
+        timeoutSeconds: 5
+        failureThreshold: 3
+    
+    env:
+      ASPNETCORE_ENVIRONMENT: "Production"
+      ASPNETCORE_URLS: "http://+:8080"
+    
+    envFrom:
+      - configMapRef:
+          name: "maintenancescheduler-configmap"
+    
+    configMap:
+      data:
+        Logging__LogLevel__Default: "Information"
+        Logging__LogLevel__Microsoft.AspNetCore: "Warning"
+        AllowedHosts: "*"
+        AssetRegistry__BaseUrl: "http://assetregistry-service"
+        Notification__BaseUrl: "http://notification-service"
+        SchedulerSettings__JobExecutionInterval: "300"
+    
+    autoscaling:
+      enabled: true
+      minReplicas: 1
+      maxReplicas: 3
+      targetCPUUtilizationPercentage: 70
+      targetMemoryUtilizationPercentage: 80
+    
+    monitoring:
+      enabled: true
+      metricsPath: "/metrics"
+      interval: "30s"
+      scrapeTimeout: "10s"
+    
+    serviceAccount:
+      annotations: {}
+      automountServiceAccountToken: false
+
+  notification:
+    enabled: true
+    replicaCount: 2
+    
+    image:
+      repository: "notification/api"
+      tag: "latest"
+      pullPolicy: IfNotPresent
+    
+    containerPort: 8080
+    
+    service:
+      type: ClusterIP
+      port: 80
+      annotations: {}
+    
+    resources:
+      limits:
+        cpu: "200m"
+        memory: "128Mi"
+      requests:
+        cpu: "50m"
+        memory: "32Mi"
+    
+    healthCheck:
+      liveness:
+        path: "/health/live"
+        initialDelaySeconds: 30
+        periodSeconds: 30
+        timeoutSeconds: 5
+        failureThreshold: 3
+      readiness:
+        path: "/health/ready"
+        initialDelaySeconds: 10
+        periodSeconds: 10
+        timeoutSeconds: 5
+        failureThreshold: 3
+    
+    env:
+      ASPNETCORE_ENVIRONMENT: "Production"
+      ASPNETCORE_URLS: "http://+:8080"
+    
+    envFrom:
+      - secretRef:
+          name: "notification-secret"
+      - configMapRef:
+          name: "notification-configmap"
+    
+    configMap:
+      data:
+        Logging__LogLevel__Default: "Information"
+        Logging__LogLevel__Microsoft.AspNetCore: "Warning"
+        AllowedHosts: "*"
+        EmailSettings__SmtpServer: "smtp.gmail.com"
+        EmailSettings__SmtpPort: "587"
+        EmailSettings__UseSsl: "true"
+    
+    secrets:
+      data:
+        EmailSettings__Username: "your-email@gmail.com"
+        EmailSettings__Password: "your-app-password"
+        EmailSettings__ApiKey: "your-email-api-key"
+    
+    autoscaling:
+      enabled: true
+      minReplicas: 1
+      maxReplicas: 5
+      targetCPUUtilizationPercentage: 70
+      targetMemoryUtilizationPercentage: 80
+    
+    monitoring:
+      enabled: true
+      metricsPath: "/metrics"
+      interval: "30s"
+      scrapeTimeout: "10s"
+    
+    serviceAccount:
+      annotations: {}
+      automountServiceAccountToken: false
+
+# Ingress configuration
+ingress:
+  enabled: true
+  ingressClassName: "nginx"
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/rate-limit: "100"
+    nginx.ingress.kubernetes.io/rate-limit-window: "1m"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+  
+  hosts:
+    - host: assetcore-api.yourdomain.com
+      paths:
+        - path: /api/assetregistry
+          pathType: Prefix
+          serviceName: assetregistry
+          servicePort: 80
+        - path: /api/auditcompliance
+          pathType: Prefix
+          serviceName: auditcompliance
+          servicePort: 80
+        - path: /api/identity
+          pathType: Prefix
+          serviceName: identityaccess
+          servicePort: 80
+        - path: /api/maintenance
+          pathType: Prefix
+          serviceName: maintenancescheduler
+          servicePort: 80
+        - path: /api/notifications
+          pathType: Prefix
+          serviceName: notification
+          servicePort: 80
+  
+  tls:
+    enabled: true
+    clusterIssuer: "letsencrypt-prod"
+
+# RBAC configuration
+rbac:
+  enabled: true
+
+# Network Policy configuration
+networkPolicy:
+  enabled: true
+  ingressNamespace: "ingress-nginx"
+
+# Autoscaling configuration
+autoscaling:
+  enabled: true
+
+# Monitoring configuration
+monitoring:
+  enabled: true
+  labels:
+    prometheus: kube-prometheus
+  alertRules:
+    enabled: true
+
+# Pod Disruption Budget
+podDisruptionBudget:
+  enabled: true
+  minAvailable: 1
+
+# Istio configuration
+istio:
+  enabled: true
+  hosts:
+    - "assetcore.local"
+    - "api.assetcore.local"
+  tls:
+    enabled: false
+    secretName: "assetcore-tls"

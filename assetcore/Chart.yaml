@@ -1,0 +1,45 @@
+apiVersion: v2
+name: assetcore
+description: A comprehensive Helm chart for AssetCore microservices platform including Asset Registry, Audit Compliance, Identity Access, Maintenance Scheduler, and Notification services
+
+# This is an application chart that packages all AssetCore microservices
+# for deployment to Kubernetes with best practices including security,
+# monitoring, autoscaling, and high availability configurations
+type: application
+
+# This is the chart version. This version number should be incremented each time you make changes
+# to the chart and its templates, including the app version.
+# Versions are expected to follow Semantic Versioning (https://semver.org/)
+version: 1.0.0
+
+# This is the version number of the application being deployed. This version number should be
+# incremented each time you make changes to the application. Versions are not expected to
+# follow Semantic Versioning. They should reflect the version the application is using.
+# It is recommended to use it with quotes.
+appVersion: "1.0.0"
+
+# Maintainers information
+maintainers:
+  - name: AssetCore Team
+    email: team@assetcore.com
+
+# Keywords for easier discovery
+keywords:
+  - asset-management
+  - microservices
+  - dotnet
+  - enterprise
+
+# Home page and source repository
+home: https://github.com/AssetCore/Asset-Registry-and-Tracking-System-
+sources:
+  - https://github.com/AssetCore/Asset-Registry-and-Tracking-System-
+  - https://github.com/AssetCore/kubernetes-deployment
+
+# Dependencies (if any external charts are needed)
+# dependencies: []
+
+# Annotations
+annotations:
+  category: Enterprise Applications
+  licenses: MIT

@@ -1,0 +1,108 @@
+# Production environment overrides
+
+services:
+  assetregistry:
+    replicaCount: 3
+    image:
+      tag: latest
+    resources:
+      limits:
+        cpu: 1000m
+        memory: 1Gi
+      requests:
+        cpu: 200m
+        memory: 256Mi
+    env:
+      ASPNETCORE_ENVIRONMENT: Production
+    autoscaling:
+      enabled: true
+      minReplicas: 3
+      maxReplicas: 15
+      targetCPUUtilizationPercentage: 60
+
+  auditcompliance:
+    replicaCount: 3
+    image:
+      tag: latest
+    resources:
+      limits:
+        cpu: 500m
+        memory: 512Mi
+      requests:
+        cpu: 100m
+        memory: 128Mi
+    env:
+      ASPNETCORE_ENVIRONMENT: Production
+    autoscaling:
+      enabled: true
+      minReplicas: 2
+      maxReplicas: 8
+      targetCPUUtilizationPercentage: 60
+
+  identityaccess:
+    replicaCount: 3
+    image:
+      tag: latest
+    resources:
+      limits:
+        cpu: 800m
+        memory: 768Mi
+      requests:
+        cpu: 200m
+        memory: 256Mi
+    env:
+      ASPNETCORE_ENVIRONMENT: Production
+    autoscaling:
+      enabled: true
+      minReplicas: 3
+      maxReplicas: 12
+      targetCPUUtilizationPercentage: 60
+
+  maintenancescheduler:
+    replicaCount: 2
+    image:
+      tag: latest
+    resources:
+      limits:
+        cpu: 500m
+        memory: 384Mi
+      requests:
+        cpu: 100m
+        memory: 128Mi
+    env:
+      ASPNETCORE_ENVIRONMENT: Production
+    autoscaling:
+      enabled: true
+      minReplicas: 2
+      maxReplicas: 5
+      targetCPUUtilizationPercentage: 60
+
+  notification:
+    replicaCount: 2
+    image:
+      tag: latest
+    resources:
+      limits:
+        cpu: 300m
+        memory: 256Mi
+      requests:
+        cpu: 75m
+        memory: 64Mi
+    env:
+      ASPNETCORE_ENVIRONMENT: Production
+    autoscaling:
+      enabled: true
+      minReplicas: 2
+      maxReplicas: 6
+      targetCPUUtilizationPercentage: 60
+
+ingress:
+  enabled: true
+  host: assetcore.example.com
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    - "*"  # Accept traffic from any hostname
+  tls:
+    enabled: false  # Disable TLS until you have proper certificates
+    secretName: "assetcore-prod-tls"

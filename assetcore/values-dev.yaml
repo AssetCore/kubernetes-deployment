@@ -1,0 +1,86 @@
+# Development environment overrides
+
+services:
+  assetregistry:
+    replicaCount: 1
+    image:
+      tag: dev
+    resources:
+      limits:
+        cpu: 200m
+        memory: 256Mi
+      requests:
+        cpu: 50m
+        memory: 64Mi
+    env:
+      ASPNETCORE_ENVIRONMENT: Development
+    autoscaling:
+      enabled: false
+
+  auditcompliance:
+    replicaCount: 1
+    image:
+      tag: dev
+    resources:
+      limits:
+        cpu: 150m
+        memory: 128Mi
+      requests:
+        cpu: 25m
+        memory: 32Mi
+    env:
+      ASPNETCORE_ENVIRONMENT: Development
+    autoscaling:
+      enabled: false
+
+  identityaccess:
+    replicaCount: 1
+    image:
+      tag: dev
+    resources:
+      limits:
+        cpu: 200m
+        memory: 192Mi
+      requests:
+        cpu: 50m
+        memory: 64Mi
+    env:
+      ASPNETCORE_ENVIRONMENT: Development
+    autoscaling:
+      enabled: false
+
+  maintenancescheduler:
+    replicaCount: 1
+    image:
+      tag: dev
+    resources:
+      limits:
+        cpu: 150m
+        memory: 128Mi
+      requests:
+        cpu: 25m
+        memory: 32Mi
+    env:
+      ASPNETCORE_ENVIRONMENT: Development
+    autoscaling:
+      enabled: false
+
+  notification:
+    replicaCount: 1
+    image:
+      tag: dev
+    resources:
+      limits:
+        cpu: 100m
+        memory: 64Mi
+      requests:
+        cpu: 25m
+        memory: 32Mi
+    env:
+      ASPNETCORE_ENVIRONMENT: Development
+    autoscaling:
+      enabled: false
+
+ingress:
+  enabled: true
+  host: assetcore-dev.localhost
