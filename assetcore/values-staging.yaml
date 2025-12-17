@@ -3,8 +3,6 @@
 services:
   assetregistry:
     replicaCount: 2
-    image:
-      tag: staging
     resources:
       limits:
         cpu: 400m
@@ -22,8 +20,6 @@ services:
 
   auditcompliance:
     replicaCount: 1
-    image:
-      tag: staging
     resources:
       limits:
         cpu: 250m
@@ -41,8 +37,6 @@ services:
 
   identityaccess:
     replicaCount: 2
-    image:
-      tag: staging
     resources:
       limits:
         cpu: 300m
@@ -60,8 +54,6 @@ services:
 
   maintenancescheduler:
     replicaCount: 1
-    image:
-      tag: staging
     resources:
       limits:
         cpu: 250m
@@ -79,8 +71,6 @@ services:
 
   notification:
     replicaCount: 1
-    image:
-      tag: staging
     resources:
       limits:
         cpu: 150m

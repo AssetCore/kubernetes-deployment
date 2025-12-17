@@ -24,6 +24,9 @@ spec:
       allowEmpty: false
     syncOptions:
       - CreateNamespace=true
+    managedNamespaceMetadata:
+      labels:
+        istio-injection: enabled
     retry:
       limit: 3
       backoff:
