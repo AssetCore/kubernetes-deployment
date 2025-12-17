@@ -1,13 +1,51 @@
 # AssetCore Helm Chart - Simplified Configuration
 
+# Global image pull secrets for GHCR
+imagePullSecrets:
+  - name: ghcr-secret
+
 # Services configuration
 services:
+  apigateway:
+    enabled: true
+    replicaCount: 2
+    image:
+      repository: ghcr.io/assetcore/apigateway
+      tag: latest
+      pullPolicy: Always
+    containerPort: 8080
+    servicePort: 80
+    resources:
+      limits:
+        cpu: 500m
+        memory: 512Mi
+      requests:
+        cpu: 100m
+        memory: 128Mi
+    env:
+      ASPNETCORE_ENVIRONMENT: Production
+    configMap:
+      enabled: true
+      data:
+        ExternalServices__AssetRegistryServiceClient__Url: "http://assetregistry-svc:80"
+        ExternalServices__IdentityServiceClient__Url: "http://identityaccess-svc:80"
+        ExternalServices__MaintainanceServiceClient__Url: "http://maintenancescheduler-svc:80"
+        ExternalServices__NotificationServiceClient__Url: "http://notification-svc:80"
+    secrets:
+      enabled: false
+    autoscaling:
+      enabled: false
+      minReplicas: 2
+      maxReplicas: 10
+      targetCPUUtilizationPercentage: 70
+
   assetregistry:
     enabled: true
     replicaCount: 2
     image:
-      repository: assetregistry/api
+      repository: ghcr.io/assetcore/assetregistry
       tag: latest
+      pullPolicy: Always
     containerPort: 8080
     servicePort: 80
     resources:
@@ -38,8 +76,9 @@ services:
     enabled: true
     replicaCount: 2
     image:
-      repository: auditcompliance/api
+      repository: ghcr.io/assetcore/auditcompliance
       tag: latest
+      pullPolicy: Always
     containerPort: 8080
     servicePort: 80
     resources:
@@ -62,8 +101,9 @@ services:
     enabled: true
     replicaCount: 2
     image:
-      repository: identityaccess/api
+      repository: ghcr.io/assetcore/identityaccess
       tag: latest
+      pullPolicy: Always
     containerPort: 8080
     servicePort: 80
     resources:
@@ -86,8 +126,9 @@ services:
     enabled: true
     replicaCount: 2
     image:
-      repository: maintenancescheduler/api
+      repository: ghcr.io/assetcore/maintenancescheduler
       tag: latest
+      pullPolicy: Always
     containerPort: 8080
     servicePort: 80
     resources:
@@ -110,8 +151,9 @@ services:
     enabled: true
     replicaCount: 2
     image:
-      repository: notification/api
+      repository: ghcr.io/assetcore/notification
       tag: latest
+      pullPolicy: Always
     containerPort: 8080
     servicePort: 80
     resources:
@@ -129,6 +171,33 @@ services:
       enabled: false
     autoscaling:
       enabled: false
+
+  frontend:
+    enabled: true
+    replicaCount: 2
+    image:
+      repository: ghcr.io/assetcore/frontend
+      tag: latest
+      pullPolicy: Always
+    containerPort: 80
+    servicePort: 80
+    resources:
+      limits:
+        cpu: 200m
+        memory: 256Mi
+      requests:
+        cpu: 50m
+        memory: 64Mi
+    env: {}
+    configMap:
+      enabled: false
+    secrets:
+      enabled: false
+    autoscaling:
+      enabled: false
+      minReplicas: 2
+      maxReplicas: 5
+      targetCPUUtilizationPercentage: 70
 
 # Ingress configuration
 ingress:
@@ -176,9 +245,9 @@ ingress:
     replicaCount: 2
     
     image:
-      repository: "identityaccess/api"
+      repository: "ghcr.io/assetcore/identityaccess"
       tag: "latest"
-      pullPolicy: IfNotPresent
+      pullPolicy: Always
     
     containerPort: 8080
     
@@ -255,9 +324,9 @@ ingress:
     replicaCount: 1
     
     image:
-      repository: "maintenancescheduler/api"
+      repository: "ghcr.io/assetcore/maintenancescheduler"
       tag: "latest"
-      pullPolicy: IfNotPresent
+      pullPolicy: Always
     
     containerPort: 8080
     
@@ -327,9 +396,9 @@ ingress:
     replicaCount: 2
     
     image:
-      repository: "notification/api"
+      repository: "ghcr.io/assetcore/notification"
       tag: "latest"
-      pullPolicy: IfNotPresent
+      pullPolicy: Always
     
     containerPort: 8080
     
@@ -417,6 +486,10 @@ ingress:
   hosts:
     - host: assetcore-api.yourdomain.com
       paths:
+        - path: /api/gateway
+          pathType: Prefix
+          serviceName: apigateway
+          servicePort: 80
         - path: /api/assetregistry
           pathType: Prefix
           serviceName: assetregistry
@@ -436,6 +509,12 @@ ingress:
         - path: /api/notifications
           pathType: Prefix
           serviceName: notification
+          servicePort: 80
+    - host: assetcore.yourdomain.com
+      paths:
+        - path: /
+          pathType: Prefix
+          serviceName: frontend
           servicePort: 80
   
   tls:

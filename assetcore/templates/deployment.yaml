@@ -20,10 +20,14 @@ spec:
       labels:
         app: {{ $serviceName }}
     spec:
+      {{- if $.Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml $.Values.imagePullSecrets | nindent 8 }}
+      {{- end }}
       containers:
         - name: {{ $serviceName }}
           image: "{{ $serviceConfig.image.repository }}:{{ $serviceConfig.image.tag | default "latest" }}"
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: {{ $serviceConfig.image.pullPolicy | default "IfNotPresent" }}
           ports:
             - containerPort: {{ $serviceConfig.containerPort | default 8080 }}
           {{- if $serviceConfig.env }}
@@ -32,6 +36,11 @@ spec:
             - name: {{ $key }}
               value: {{ $value | quote }}
             {{- end }}
+          {{- end }}
+          {{- if and $serviceConfig.configMap $serviceConfig.configMap.enabled }}
+          envFrom:
+            - configMapRef:
+                name: {{ $serviceName }}-config
           {{- end }}
           resources:
             {{- toYaml $serviceConfig.resources | nindent 12 }}
