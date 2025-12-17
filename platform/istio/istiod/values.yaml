@@ -1,0 +1,130 @@
+# Istiod (Control Plane) Helm Values
+
+global:
+  istioNamespace: istio-system
+  logging:
+    level: "default:info"
+  
+  proxy:
+    resources:
+      requests:
+        cpu: 100m
+        memory: 128Mi
+      limits:
+        cpu: 2000m
+        memory: 1Gi
+    
+    concurrency: 2
+    logLevel: warning
+    componentLogLevel: "misc:error"
+  
+  istiod:
+    enableAnalysis: true
+
+pilot:
+  replicaCount: 2
+  autoscaleEnabled: true
+  autoscaleMin: 2
+  autoscaleMax: 5
+  
+  resources:
+    requests:
+      cpu: 500m
+      memory: 2Gi
+    limits:
+      cpu: 1000m
+      memory: 4Gi
+  
+  cpu:
+    targetAverageUtilization: 80
+  
+  podDisruptionBudget:
+    minAvailable: 1
+  
+  configValidation: true
+  enableAnalysis: true
+  traceSampling: 1.0
+  
+  env:
+    PILOT_ENABLE_CONFIG_DISTRIBUTION_TRACKING: "false"
+    PILOT_ENABLE_STATUS: "true"
+  
+  affinity:
+    podAntiAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+        - weight: 100
+          podAffinityTerm:
+            labelSelector:
+              matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                    - istiod
+            topologyKey: topology.kubernetes.io/zone
+        - weight: 50
+          podAffinityTerm:
+            labelSelector:
+              matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                    - istiod
+            topologyKey: kubernetes.io/hostname
+  
+  tolerations: []
+  nodeSelector: {}
+
+meshConfig:
+  enableAutoMtls: true
+  accessLogFile: ""
+  accessLogEncoding: "JSON"
+  
+  defaultConfig:
+    holdApplicationUntilProxyStarts: true
+    tracing: {}
+    concurrency: 2
+    discoveryAddress: istiod.istio-system.svc:15012
+  
+  outboundTrafficPolicy:
+    mode: ALLOW_ANY
+  
+  defaultServiceExportTo:
+    - "*"
+  
+  defaultVirtualServiceExportTo:
+    - "*"
+  
+  defaultDestinationRuleExportTo:
+    - "*"
+  
+  trustDomain: "cluster.local"
+  protocolDetectionTimeout: 5s
+
+telemetry:
+  enabled: true
+  v2:
+    enabled: true
+    prometheus:
+      enabled: true
+    stackdriver:
+      enabled: false
+
+serviceAccount:
+  create: true
+  name: istiod
+
+podSecurityContext:
+  fsGroup: 1337
+
+securityContext:
+  runAsUser: 1337
+  runAsGroup: 1337
+  runAsNonRoot: true
+  capabilities:
+    drop:
+      - ALL
+
+revision: ""
+
+cni:
+  enabled: false

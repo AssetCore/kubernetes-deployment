@@ -1,0 +1,7 @@
+# Istio Base Helm Values
+
+defaultRevision: default
+validationURL: ""
+
+global:
+  istioNamespace: istio-system
