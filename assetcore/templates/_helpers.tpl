@@ -34,6 +34,11 @@ Selector labels
 app.kubernetes.io/name: {{ include "assetcore.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
+
+{{/*
+Common environment variables
+*/}}
+{{- define "assetcore.commonEnv" -}}
 - name: POD_NAMESPACE
   valueFrom:
     fieldRef:
