@@ -1,0 +1,50 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: assetcore
+  namespace: argocd
+spec:
+  description: AssetCore application workloads
+  
+  sourceRepos:
+    - https://github.com/AssetCore/kubernetes-deployment
+  
+  destinations:
+    - namespace: assetcore-dev
+      server: https://kubernetes.default.svc
+  
+  clusterResourceWhitelist:
+    - group: ''
+      kind: Namespace
+  
+  namespaceResourceWhitelist:
+    - group: ''
+      kind: ServiceAccount
+    - group: ''
+      kind: Service
+    - group: ''
+      kind: ConfigMap
+    - group: ''
+      kind: Secret
+    - group: ''
+      kind: PersistentVolumeClaim
+    - group: apps
+      kind: Deployment
+    - group: apps
+      kind: StatefulSet
+    - group: batch
+      kind: Job
+    - group: batch
+      kind: CronJob
+    - group: autoscaling
+      kind: HorizontalPodAutoscaler
+    - group: networking.k8s.io
+      kind: Ingress
+    - group: networking.istio.io
+      kind: VirtualService
+    - group: networking.istio.io
+      kind: DestinationRule
+    - group: networking.istio.io
+      kind: Gateway
+    - group: policy
+      kind: PodDisruptionBudget

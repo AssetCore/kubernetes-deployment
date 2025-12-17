@@ -1,20 +1,22 @@
----
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: istio-platform
+  name: assetcore-dev
   namespace: argocd
   finalizers:
     - resources-finalizer.argocd.argoproj.io
 spec:
-  project: platform
+  project: assetcore
   source:
     repoURL: https://github.com/AssetCore/kubernetes-deployment
     targetRevision: main
-    path: platform/istio/applications
+    path: assetcore
+    helm:
+      valueFiles:
+        - values-dev.yaml
   destination:
     server: https://kubernetes.default.svc
-    namespace: argocd
+    namespace: assetcore-dev
   syncPolicy:
     automated:
       prune: true
@@ -23,7 +25,7 @@ spec:
     syncOptions:
       - CreateNamespace=true
     retry:
-      limit: 5
+      limit: 3
       backoff:
         duration: 5s
         factor: 2

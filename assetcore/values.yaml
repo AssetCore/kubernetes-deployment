@@ -204,20 +204,56 @@ ingress:
   enabled: false
   host: assetcore.local
   annotations: {}
-        periodSeconds: 10
-        timeoutSeconds: 5
-        failureThreshold: 3
-    
-    env:
-      ASPNETCORE_ENVIRONMENT: "Production"
-      ASPNETCORE_URLS: "http://+:8080"
-    
-    envFrom:
-      - configMapRef:
-          name: "auditcompliance-configmap"
-    
-    configMap:
-      data:
+
+# AuditCompliance service configuration
+auditcompliance:
+  replicaCount: 2
+  image:
+    repository: ghcr.io/assetcore/auditcompliance
+    tag: latest
+    pullPolicy: IfNotPresent
+  
+  service:
+    type: ClusterIP
+    port: 80
+    targetPort: 8080
+  
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+  
+  livenessProbe:
+    httpGet:
+      path: /health
+      port: 8080
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+  
+  readinessProbe:
+    httpGet:
+      path: /ready
+      port: 8080
+    initialDelaySeconds: 10
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+  
+  env:
+    ASPNETCORE_ENVIRONMENT: "Production"
+    ASPNETCORE_URLS: "http://+:8080"
+  
+  envFrom:
+    - configMapRef:
+        name: "auditcompliance-configmap"
+  
+  configMap:
+    data:
         Logging__LogLevel__Default: "Information"
         Logging__LogLevel__Microsoft.AspNetCore: "Warning"
         AllowedHosts: "*"
