@@ -61,5 +61,15 @@ spec:
           
           resources:
             {{- toYaml $serviceConfig.resources | nindent 12 }}
+          
+          {{- if $serviceConfig.livenessProbe }}
+          livenessProbe:
+            {{- toYaml $serviceConfig.livenessProbe | nindent 12 }}
+          {{- end }}
+          
+          {{- if $serviceConfig.readinessProbe }}
+          readinessProbe:
+            {{- toYaml $serviceConfig.readinessProbe | nindent 12 }}
+          {{- end }}
 {{- end }}
 {{- end }}
