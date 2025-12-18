@@ -1,5 +1,11 @@
 # Development environment overrides
-
+# OpenSearch Configuration for Development
+opensearch:
+  enabled: true
+  uri: "https://3.150.64.215:9200"
+  username: "admin"
+  password: "MyStrongPassword123!"
+  credentialsSecret: "opensearch-credentials"
 services:
   apigateway:
     replicaCount: 1
