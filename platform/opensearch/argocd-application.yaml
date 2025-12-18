@@ -6,7 +6,7 @@ metadata:
 spec:
   project: platform
   source:
-    repoURL: https://github.com/your-org/kubernetes-deployment
+    repoURL: https://github.com/AssetCore/kubernetes-deployment
     targetRevision: main
     path: platform/opensearch
   destination:

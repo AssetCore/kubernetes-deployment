@@ -329,7 +329,7 @@ auditcompliance:
         Logging__LogLevel__Default: "Information"
         Logging__LogLevel__Microsoft.AspNetCore: "Warning"
         AllowedHosts: "*"
-        AsgardeoSettings__OrganizationName: "your-org"
+        AsgardeoSettings__OrganizationName: "AssetCore"
         AsgardeoSettings__BaseUrl: "https://api.asgardeo.io"
     
     secrets:
