@@ -1,0 +1,143 @@
+---
+# Istio Gateway - Entry point for external traffic
+apiVersion: networking.istio.io/v1beta1
+kind: Gateway
+metadata:
+  name: asset-registry-gateway
+  namespace: istio-system
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+  - port:
+      number: 8080
+      name: http
+      protocol: HTTP
+    hosts:
+    - "*"
+---
+# VirtualService for AssetRegistry
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: assetregistry-vs
+  namespace: assetcore-dev
+spec:
+  hosts:
+  - "*"
+  gateways:
+  - istio-system/asset-registry-gateway
+  http:
+  - match:
+    - uri:
+        prefix: "/assetregistry"
+    route:
+    - destination:
+        host: assetregistry-svc
+        port:
+          number: 80
+---
+# VirtualService for IdentityAccess
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: identity-vs
+  namespace: assetcore-dev
+spec:
+  hosts:
+  - "*"
+  gateways:
+  - istio-system/asset-registry-gateway
+  http:
+  - match:
+    - uri:
+        prefix: "/identity"
+    route:
+    - destination:
+        host: identityaccess-svc
+        port:
+          number: 80
+---
+# VirtualService for Maintenance
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: maintenance-vs
+  namespace: assetcore-dev
+spec:
+  hosts:
+  - "*"
+  gateways:
+  - istio-system/asset-registry-gateway
+  http:
+  - match:
+    - uri:
+        prefix: "/maintenance"
+    route:
+    - destination:
+        host: maintenancescheduler-svc
+        port:
+          number: 80
+---
+# VirtualService for Notification
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: notification-vs
+  namespace: assetcore-dev
+spec:
+  hosts:
+  - "*"
+  gateways:
+  - istio-system/asset-registry-gateway
+  http:
+  - match:
+    - uri:
+        prefix: "/notification"
+    route:
+    - destination:
+        host: notification-svc
+        port:
+          number: 80
+---
+# VirtualService for Audit
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: audit-vs
+  namespace: assetcore-dev
+spec:
+  hosts:
+  - "*"
+  gateways:
+  - istio-system/asset-registry-gateway
+  http:
+  - match:
+    - uri:
+        prefix: "/audit"
+    route:
+    - destination:
+        host: auditcompliance-svc
+        port:
+          number: 80
+---
+# VirtualService for API Gateway
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: apigateway-vs
+  namespace: assetcore-dev
+spec:
+  hosts:
+  - "*"
+  gateways:
+  - istio-system/asset-registry-gateway
+  http:
+  - match:
+    - uri:
+        prefix: "/api"
+    route:
+    - destination:
+        host: apigateway-svc
+        port:
+          number: 80
