@@ -4,7 +4,8 @@ services:
   apigateway:
     replicaCount: 1
     image:
-      tag: v1.0.3
+      # tag: v1.0.3
+      tag: "{{.Values.apigateway.imageTag }}"
     resources:
       limits:
         cpu: 200m
@@ -20,7 +21,8 @@ services:
   assetregistry:
     replicaCount: 1
     image:
-      tag: v1.0.20
+      # tag: v1.0.20
+      tag: "{{.Values.assetregistry.imageTag }}"
     resources:
       limits:
         cpu: 200m
@@ -36,7 +38,8 @@ services:
   auditcompliance:
     replicaCount: 1
     image:
-      tag: v1.0.15
+      # tag: v1.0.15
+      tag: "{{.Values.auditcompliance.imageTag }}"
     resources:
       limits:
         cpu: 150m
@@ -52,7 +55,8 @@ services:
   identityaccess:
     replicaCount: 1
     image:
-      tag: v1.0.13
+      # tag: v1.0.13
+      tag: "{{.Values.identityaccess.imageTag }}"
     resources:
       limits:
         cpu: 200m
@@ -68,7 +72,8 @@ services:
   maintenancescheduler:
     replicaCount: 1
     image:
-      tag: v1.0.35
+      # tag: v1.0.35
+      tag: "{{.Values.maintenancescheduler.imageTag }}"
     resources:
       limits:
         cpu: 150m
@@ -84,7 +89,8 @@ services:
   notification:
     replicaCount: 1
     image:
-      tag: v1.0.15
+      # tag: v1.0.15
+      tag: "{{.Values.notification.imageTag }}"
     resources:
       limits:
         cpu: 100m
