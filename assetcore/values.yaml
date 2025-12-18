@@ -3,6 +3,13 @@
 # Global image pull secrets for GHCR
 imagePullSecrets:
   - name: ghcr-secret
+  # OpenSearch Configuration
+opensearch:
+  enabled: true
+  uri: "https://opensearch-svc.default.svc.cluster.local:9200"
+  credentialsSecret: "opensearch-credentials"
+  username: ""  # Override in values-dev.yaml
+  password: ""  # Override in values-dev.yaml
 
 # Services configuration
 services:
