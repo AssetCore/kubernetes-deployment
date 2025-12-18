@@ -30,18 +30,35 @@ spec:
           imagePullPolicy: {{ $serviceConfig.image.pullPolicy | default "IfNotPresent" }}
           ports:
             - containerPort: {{ $serviceConfig.containerPort | default 8080 }}
-          {{- if $serviceConfig.env }}
+          
           env:
+            {{- if $serviceConfig.env }}
             {{- range $key, $value := $serviceConfig.env }}
             - name: {{ $key }}
               value: {{ $value | quote }}
             {{- end }}
-          {{- end }}
+            {{- end }}
+            
+            {{- if $.Values.opensearch.enabled }}
+            # OpenSearch credentials from Secret
+            - name: OpenSearch__Username
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $.Values.opensearch.credentialsSecret | default "opensearch-credentials" }}
+                  key: username
+            - name: OpenSearch__Password
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $.Values.opensearch.credentialsSecret | default "opensearch-credentials" }}
+                  key: password
+            {{- end }}
+          
           {{- if and $serviceConfig.configMap $serviceConfig.configMap.enabled }}
           envFrom:
             - configMapRef:
                 name: {{ $serviceName }}-config
           {{- end }}
+          
           resources:
             {{- toYaml $serviceConfig.resources | nindent 12 }}
 {{- end }}
