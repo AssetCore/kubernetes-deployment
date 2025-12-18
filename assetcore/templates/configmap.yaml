@@ -1,16 +1,27 @@
 {{- range $serviceName, $serviceConfig := .Values.services }}
-{{- if and $serviceConfig.enabled $serviceConfig.configMap.enabled }}
+{{- if and $serviceConfig.enabled $serviceConfig.configMap $serviceConfig.configMap.enabled }}
 ---
 apiVersion: v1
 kind: ConfigMap
 metadata:
   name: {{ $serviceName }}-config
+  namespace: {{ $.Values.namespace | default "default" }}
   labels:
     app: {{ $serviceName }}
     {{- include "assetcore.labels" $ | nindent 4 }}
 data:
+  {{- if $.Values.opensearch.enabled }}
+  # OpenSearch configuration
+  OpenSearch__Uri: {{ $.Values.opensearch.uri | quote }}
+  OpenSearch__Enabled: "true"
+  OpenSearch__IndexFormat: {{ printf "%s-{0:yyyy.MM.dd}" $serviceName | quote }}
+  {{- end }}
+  
+  {{- if $serviceConfig.configMap.data }}
+  # Additional service-specific configuration
   {{- range $key, $value := $serviceConfig.configMap.data }}
   {{ $key }}: {{ $value | quote }}
+  {{- end }}
   {{- end }}
 {{- end }}
 {{- end }}
