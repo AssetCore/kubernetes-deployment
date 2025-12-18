@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: opensearch-config
+  namespace: default
+data:
+  OPENSEARCH_URI: "https://3.150.64.215:9200"
+  OPENSEARCH_ENABLED: "true"
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: opensearch-credentials
+  namespace: default
+type: Opaque
+stringData:
+  username: admin
+  password: MyStrongPassword123!
